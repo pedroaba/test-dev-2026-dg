@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+{% load static %}
+
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Test DG 2026</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 <!--
@@ -14,5 +17,57 @@ TODO: You must provide 2 selects to filter the rows based in:
  2) consumption range
  - You must create the filter functionality in the front-end using JS
 -->
+    <main>
+        <h1>Calculadora de economia</h1>
+        <h2>Insira as informações abaixo e receba um resumo da sua economia</h2>
+
+        <form method="post" id="form_calculator">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-alert" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {{ form.as_p }}
+
+            <button type="submit">Calcular economia</button>
+        </form>
+
+        {% if result %}
+            <section class="result-card" aria-live="polite">
+                <div>
+                    <p class="eyebrow">Resultado estimado</p>
+                    <h3>Sua economia calculada</h3>
+                </div>
+
+                <dl class="result-grid">
+                    <div class="result-item result-item-highlight">
+                        <dt>Economia anual</dt>
+                        <dd>R$ {{ result.annual_savings }}</dd>
+                    </div>
+                    <div class="result-item">
+                        <dt>Economia mensal</dt>
+                        <dd>R$ {{ result.monthly_savings }}</dd>
+                    </div>
+                    <div class="result-item">
+                        <dt>Desconto aplicado</dt>
+                        <dd>{{ result.applied_discount }}%</dd>
+                    </div>
+                    <div class="result-item">
+                        <dt>Cobertura</dt>
+                        <dd>{{ result.coverage }}%</dd>
+                    </div>
+                    <div class="result-item">
+                        <dt>Consumo medio</dt>
+                        <dd>{{ result.average_consumption }} kWh</dd>
+                    </div>
+                </dl>
+            </section>
+        {% endif %}
+    </main>
+
+    <script src="{% static 'js/form_control.js' %}"></script>
 </body>
 </html>
