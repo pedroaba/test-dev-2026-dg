@@ -1,7 +1,10 @@
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import redirect, render
 
-from calculator.forms import CalculatorForm
+from calculator.forms import CalculatorForm, ConsumerForm
+from calculator.models import Consumer, DiscountRule
 from calculator_python import calculator
+from calculator.utils import get_consumption_range
 
 # TODO: Your list view should do the following tasks
 """
@@ -14,6 +17,15 @@ from calculator_python import calculator
 
 def calculator_view(request):
     result = None
+    selected_type = request.GET.get("type", "")
+    selected_range = request.GET.get("range", "")
+    consumers = Consumer.objects.select_related("discount_rule").order_by("name")
+
+    if selected_type:
+        consumers = consumers.filter(discount_rule__consumer_type=selected_type)
+
+    if selected_range:
+        consumers = consumers.filter(discount_rule__consumption_range=selected_range)
 
     if request.method == "POST":
         form = CalculatorForm(request.POST)
@@ -51,6 +63,9 @@ def calculator_view(request):
         {
             "form": form,
             "result": result,
+            "consumers": consumers,
+            "selected_type": selected_type,
+            "selected_range": selected_range,
         },
     )
 
@@ -66,6 +81,21 @@ this page must be provided in the main page.
 """
 
 
-def view2():
-    # Create the second view here.
-    pass
+def create_consumer_view(request):
+    if request.method == "POST":
+        form = ConsumerForm(request.POST)
+
+        if form.is_valid():
+            consumer = form.save(commit=False)
+            tax_type = form.cleaned_data["tax_type"]
+            consumer.discount_rule = DiscountRule.objects.get(
+                consumer_type=tax_type,
+                consumption_range=get_consumption_range(consumer.consumption),
+            )
+            consumer.save()
+            messages.success(request, "Consumidor cadastrado com sucesso.")
+            return redirect("calculator")
+    else:
+        form = ConsumerForm()
+
+    return render(request, "calculator/create_consumer.html", {"form": form})

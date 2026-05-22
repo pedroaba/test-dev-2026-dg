@@ -15,59 +15,170 @@ TODO: You must display the data sent to the template in a table with the follow 
 TODO: You must provide 2 selects to filter the rows based in:
  1) consumer type
  2) consumption range
- - You must create the filter functionality in the front-end using JS
 -->
     <main>
-        <h1>Calculadora de economia</h1>
-        <h2>Insira as informações abaixo e receba um resumo da sua economia</h2>
-
-        <form method="post" id="form_calculator">
-            {% csrf_token %}
-
-            {% if form.non_field_errors %}
-                <div class="form-alert" role="alert">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            {{ form.as_p }}
-
-            <button type="submit">Calcular economia</button>
-        </form>
-
-        {% if result %}
-            <section class="result-card" aria-live="polite">
-                <div>
-                    <p class="eyebrow">Resultado estimado</p>
-                    <h3>Sua economia calculada</h3>
-                </div>
-
-                <dl class="result-grid">
-                    <div class="result-item result-item-highlight">
-                        <dt>Economia anual</dt>
-                        <dd>R$ {{ result.annual_savings }}</dd>
-                    </div>
-                    <div class="result-item">
-                        <dt>Economia mensal</dt>
-                        <dd>R$ {{ result.monthly_savings }}</dd>
-                    </div>
-                    <div class="result-item">
-                        <dt>Desconto aplicado</dt>
-                        <dd>{{ result.applied_discount }}%</dd>
-                    </div>
-                    <div class="result-item">
-                        <dt>Cobertura</dt>
-                        <dd>{{ result.coverage }}%</dd>
-                    </div>
-                    <div class="result-item">
-                        <dt>Consumo medio</dt>
-                        <dd>{{ result.average_consumption }} kWh</dd>
-                    </div>
-                </dl>
-            </section>
+        {% if messages %}
+            <div class="messages-panel">
+                {% for message in messages %}
+                    <p class="message message-{{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
         {% endif %}
+
+        <section class="calculator-panel">
+            <h1>Calculadora de economia</h1>
+            <h2>Insira as informações abaixo e receba um resumo da sua economia</h2>
+
+            <form method="post" id="form_calculator">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="form-alert" role="alert">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {{ form.as_p }}
+
+                <button type="submit">Calcular economia</button>
+            </form>
+
+            {% if result %}
+                <section class="result-card" aria-live="polite">
+                    <div>
+                        <p class="eyebrow">Resultado estimado</p>
+                        <h3>Sua economia calculada</h3>
+                    </div>
+
+                    <dl class="result-grid">
+                        <div class="result-item result-item-highlight">
+                            <dt>Economia anual</dt>
+                            <dd>R$ {{ result.annual_savings }}</dd>
+                        </div>
+                        <div class="result-item">
+                            <dt>Economia mensal</dt>
+                            <dd>R$ {{ result.monthly_savings }}</dd>
+                        </div>
+                        <div class="result-item">
+                            <dt>Desconto aplicado</dt>
+                            <dd>{{ result.applied_discount }}%</dd>
+                        </div>
+                        <div class="result-item">
+                            <dt>Cobertura</dt>
+                            <dd>{{ result.coverage }}%</dd>
+                        </div>
+                        <div class="result-item">
+                            <dt>Consumo medio</dt>
+                            <dd>{{ result.average_consumption }} kWh</dd>
+                        </div>
+                    </dl>
+                </section>
+            {% endif %}
+        </section>
+
+        <section class="consumers-panel">
+            <div class="panel-header">
+                <div>
+                    <h2>Consumidores cadastrados</h2>
+                </div>
+
+                <div class="header-actions">
+                    <a href="{% url 'create_consumer' %}" class="secondary-button">Novo consumidor</a>
+
+                    <form method="post" action="{% url 'consumer_batch_import' %}" enctype="multipart/form-data" class="import-form">
+                        {% csrf_token %}
+                        <label for="excel_file" class="import-button">Importar Excel</label>
+                        <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls" onchange="this.form.submit()">
+                    </form>
+                </div>
+            </div>
+
+            <form method="get" class="filters">
+                <label>
+                    Tipo
+                    <select name="type" onchange="this.form.submit()">
+                        <option value="">Todos</option>
+                        <option value="Residencial" {% if selected_type == "Residencial" %}selected{% endif %}>Residencial</option>
+                        <option value="Comercial" {% if selected_type == "Comercial" %}selected{% endif %}>Comercial</option>
+                        <option value="Industrial" {% if selected_type == "Industrial" %}selected{% endif %}>Industrial</option>
+                    </select>
+                </label>
+
+                <label>
+                    Faixa de consumo
+                    <select name="range" onchange="this.form.submit()">
+                        <option value="">Todas</option>
+                        <option value="until_10000" {% if selected_range == "until_10000" %}selected{% endif %}>Menor que 10.000 kWh</option>
+                        <option value="between_10000_and_20000" {% if selected_range == "between_10000_and_20000" %}selected{% endif %}>Entre 10.000 e 20.000 kWh</option>
+                        <option value="above_20000" {% if selected_range == "above_20000" %}selected{% endif %}>Maior que 20.000 kWh</option>
+                    </select>
+                </label>
+            </form>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Documento</th>
+                            <th>Consumo</th>
+                            <th>Tipo</th>
+                            <th>Cobertura</th>
+                            <th>Desconto</th>
+                            <th>Economia (Mensal)</th>
+                            <th>Economia (Anual)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for consumer in consumers %}
+                            <tr>
+                                {% with calculation=consumer.calculate %}
+                                <td>{{ consumer.name }}</td>
+                                <td>{{ consumer.document }}</td>
+                                <td>{{ consumer.consumption }} kWh</td>
+                                <td>{{ consumer.discount_rule.consumer_type }}</td>
+                                <td>{{ calculation.coverage }}%</td>
+                                <td>{{ calculation.discount }}%</td>
+                                <td>R$ {{ calculation.monthly_savings }}</td>
+                                <td>R$ {{ calculation.annual_savings }}</td>
+                                {% endwith %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="empty-table">
+                                    Nenhum consumidor encontrado.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
-    <script src="{% static 'js/form_control.js' %}"></script>
+    <script>
+        function allowDecimalInput(event) {
+            if (event.inputType !== "insertText") {
+                return;
+            }
+
+            const nextValue =
+                event.target.value.slice(0, event.target.selectionStart) +
+                event.data +
+                event.target.value.slice(event.target.selectionEnd);
+
+            if (!/^[0-9.,]$/.test(event.data) || (nextValue.match(/[.,]/g) || []).length > 1) {
+                event.preventDefault();
+            }
+        }
+
+        document.getElementById("id_month_1").onbeforeinput = allowDecimalInput;
+        document.getElementById("id_month_2").onbeforeinput = allowDecimalInput;
+        document.getElementById("id_month_3").onbeforeinput = allowDecimalInput;
+        document.getElementById("id_distributor_tax").onbeforeinput = allowDecimalInput;
+        document.getElementById("excel_file").onchange = function () {
+            this.form.submit();
+        };
+    </script>
 </body>
 </html>
