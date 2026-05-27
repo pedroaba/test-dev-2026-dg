@@ -1,90 +1,131 @@
-<p style="text-align:center" dir="auto">
-  <a href="#orientacoes">Orientações</a>
-  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#observacoes">Observações</a>
-  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#etapa-1">Etapa 1</a>
-  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#etapa-2">Etapa 2</a>
-  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-  <a href="#etapa-3">Etapa 3</a>
-</p>
-<hr>
-<h1 style="text-align:center">Desenvolvedor Web (Back/Front-End) - Django/Python</h1>
-<h2 id="orientacoes" style="text-align:center;border-bottom:none">Orientações</h2>
+# Test DG 2026 - Calculadora de Economia de Energia
 
-- Deverá ser utilizada a linguagem Python e o framework Django para desenvolver as soluções;
-- O candidato terá que criar uma branch nomeada com o seu nome e abrir um pull request para concluir a entrega do teste;
-- <strong>Atenção</strong>: O candidato precisa fazer o fork do repositório para conseguir abrir o pull request;
+Projeto técnico desenvolvido em **Python**, **Django** e **Django REST Framework** para uma empresa de assinatura de energia, contemplando a calculadora de economia no site, a gestão de consumidores e os endpoints de API para integração (regras de desconto, regras de cobertura, atualização e exclusão de consumidores), com documentação via Swagger.
 
-<hr>
-<h2 id="observacoes" style="text-align:center;border-bottom:none">Observações</h2>
+## Visão geral
 
-- O banco de dados utilizado fica a sua escolha;
-- Podem ser feitas alterações nas configurações do projeto Django;
+O projeto implementa uma calculadora de economia para uma empresa de assinatura de energia e evolui para um sistema com:
 
-<hr>
-<h2 id="etapa-1" style="text-align:center;border-bottom:none">Etapa 1</h2>
+- simulação de economia por consumo e tarifa;
+- cadastro e edição de consumidores;
+- validação de documento (CPF/CNPJ), sem vínculo com o tipo de consumidor;
+- vinculação automática de regra de desconto;
+- listagem com filtros por tipo e faixa de consumo;
+- importação em lote via arquivo Excel;
+- endpoints REST para suporte ao front-end e integrações.
 
-Uma empresa de assinatura de energia está interessada em criar uma calculadora de economia em seu site e consultou você para desenvolver a calculadora para eles. Eles definiram como requisito a utilização da linguagem Python e o framework Django para desenvolver a aplicação.
+## Funcionalidades
 
-### Sua aplicação receberá as seguintes entradas:
+### 1) Calculadora de economia
 
-- Três valores representando o consumo de energia elétrica dos últimos 3 meses
-- Valor da tarifa da distribuidora
-- Tipo de tarifa (Comercial, Residencial e Industrial)
+Recebe:
 
-### Os resultados da sua aplicação serão:
+- consumo dos últimos 3 meses;
+- tarifa da distribuidora;
+- tipo de tarifa/consumidor (`Residencial`, `Comercial`, `Industrial`).
 
-- Economia Anual
-- Economia Mensal
-- Desconto Aplicado
-- Cobertura
+Retorna:
 
-#### A empresa de assinatura de energia te forneceu as seguintes premissas para o desconto:
+- economia mensal;
+- economia anual;
+- desconto aplicado;
+- cobertura.
 
-| Consumo (Média) | Desconto (Residencial) | Desconto (Comercial) | Desconto (Industrial) |
-| --- | --- | --- | --- |
-| < 10.000 kWh | 18% | 16% | 12% |
-| >= 10.000 kWh e <= 20.000 kWh | 22% | 18% | 15% |
-| > 20.000 kWh | 25% | 22% | 18% |
+### 2) Gestão de consumidores
 
-#### Alem disso, deve-se considerar os seguintes percentuais de cobertura baseado no consumo:
+- cadastro de novo consumidor por formulário;
+- edição e exclusão de consumidor;
+- listagem em tabela com dados e economia calculada;
+- filtros por tipo de consumidor e faixa de consumo.
 
-| Consumo (Média) - kWh | < 10.000 kWh | >= 10.000 kWh e <= 20.000 kWh | > 20.000 kWh |
-| --- | --- | --- | --- |
-| Cobertura*** | 90% | 95% | 99% |
+### 3) Importação de consumidores por Excel
 
-*** Cobertura é o valor da energia que o consumidor irá receber da empresa de assinatura de energia em relação à energia consumida
+- upload de planilha `.xlsx`/`.xls`;
+- validação de colunas obrigatórias e dados por linha;
+- criação/atualização de consumidores com base no documento;
+- exibição de mensagens de erro amigáveis na interface quando houver dados inválidos.
 
-### Requisitos Etapa 1:
+### 4) API e documentação
 
-1. A calculadora terá que ser desenvolvida no arquivo calculator_python.py dentro da função calculator();
-2. Todos os testes presentes no arquivo calculator_python.py precisam ser executados sem erros;
-3. Deverá ser utilizado o framework Django para fazer a integração entre a calculadora e a interface que você deve desenvolver.
+- API REST com Django REST Framework;
+- documentação OpenAPI via `drf-spectacular` (Swagger/ReDoc).
 
+## Stack e versões
 
-<hr>
-<h2 id="etapa-2" style="text-align:center;border-bottom:none">Etapa 2</h2>
+- **Python**: `3.10.20`
+- **Django**: `4.0.3`
+- **Django REST Framework**: `3.14.0`
+- **drf-spectacular**: `0.29.0`
+- **Banco de dados**: SQLite (desenvolvimento local)
+- **Importação de planilha**: pandas + openpyxl
 
-A empresa de energia gostou da sua solução para o cálculo de economia, mas necessita de algumas alterações para disponibilizá-lo aos clientes. Assim, resolveu contratá-lo novamente para desenvolver essas novas funcionalidades. Você continuará o projeto anterior usando a linguagem Python e o framework Django.
+## Como executar o projeto
 
-### Requisitos Etapa 2:
+### 1) Pré-requisitos
 
-1. Armazenar consumidores, seus dados pessoais e de consumo no banco de dados.(dados para cadastro na planilha consumers.xlsx);
-2. Armazenar as regras de desconto seguindo a tabela dada no banco de dados;
-3. Associar cada consumidor cadastrado a uma regra de desconto;
-4. Calcular a economia baseada nos atributos do consumidor;
-5. Listar os consumidores e a economia em uma tabela para uso dos clientes.
+- Python `3.10.20` instalado;
+- `pip` disponível no ambiente.
 
-<hr>
-<h2 id="etapa-3" style="text-align:center;border-bottom:none">Etapa 3</h2>
+### 2) Clonar e acessar o projeto
 
-A empresa de energia gostou da sua aplicação web, mas necessita de algumas alterações para melhor experiência dos clientes. Assim, resolveu contratá-lo novamente para desenvolver novas funcionalidades. Você continuará o projeto anterior usando a linguagem Python e o framework Django.
+```bash
+git clone <url-do-repositorio>
+cd test-dev-2026-dg
+```
 
-### Requisitos Etapa 3:
+### 3) Criar e ativar ambiente virtual
 
-1. Permitir filtragem na tabela por tipo de consumidor e intervalo de consumo;
-2. Permitir inclusão de consumidores por meio de formulário;
-3. O formulário de cadastro deve preencher os campos de estado e cidade baseado no CEP. Para isso, você deverá usar a API gratuita https://viacep.com.br/
-4. O documento do consumidor deve ser validado de acordo com o tipo. A validação pode ser no back ou no front-end.
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 4) Instalar dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5) Aplicar migrações
+
+```bash
+python manage.py migrate
+```
+
+### 6) Iniciar servidor
+
+```bash
+python manage.py runserver
+```
+
+Aplicação web:
+
+- [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+## Rotas principais
+
+### Web
+
+- `/` - calculadora de economia;
+- `/consumers/` - listagem de consumidores;
+- `/consumers/create/` - cadastro de consumidor;
+- `/consumers/<id>/update/` - edição de consumidor.
+
+### API
+
+- `/api/v1/discount/rules/` - lista regras de desconto;
+- `/api/v1/discount/coverages/` - lista coberturas por faixa;
+- `/api/v1/consumer/batch-import` - importação de consumidores por Excel;
+- `/api/v1/consumer/<id>/` - atualizar/excluir consumidor.
+
+### Documentação da API
+
+- `/api/schema/` - schema OpenAPI;
+- `/api/docs/` - Swagger UI;
+- `/api/redoc/` - ReDoc.
+
+## Observações
+
+- O projeto está configurado para ambiente de desenvolvimento (`DEBUG=True`).
+- O banco SQLite é criado localmente no arquivo `db.sqlite3`.
+- Arquivos estáticos são servidos a partir da pasta `static/`.
