@@ -1,0 +1,44 @@
+<div class="table-wrapper data-table">
+    <table{% if table_label %} aria-label="{{ table_label }}"{% endif %}>
+        <thead>
+            <tr>
+                {% for header in table_headers %}
+                    <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_rows %}
+                <tr>
+                    {% for cell in row.cells %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                    <td>
+                        {% if row.buttons %}
+                            <div class="table-actions">
+                                {% for button in row.buttons %}
+                                    <button
+                                        type="button"
+                                        class="table-action-button table-action-{{ button.action }}"
+                                        data-action="{{ button.action }}"
+                                        data-method="{{ button.method|default:'GET' }}"
+                                        data-url="{{ button.url }}"
+                                        {% if button.page %}data-page="{{ button.page }}"{% endif %}
+                                    >
+                                        {{ button.label }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="{{ table_headers|length }}" class="empty-table">
+                        {{ empty_message|default:"Nenhum registro encontrado." }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

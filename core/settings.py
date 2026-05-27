@@ -1,11 +1,17 @@
+"""Development settings for the interview calculator project.
+
+This project intentionally uses SQLite and local static files so it can be run
+quickly during review without external infrastructure.
+"""
+
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Absolute project root. Other filesystem settings are derived from this path.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
+# Quick-start development settings - unsuitable for production.
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -17,10 +23,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
-
+# Django and third-party apps loaded for this project.
 INSTALLED_APPS = [
     "rest_framework",
+    "drf_spectacular",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -30,6 +36,7 @@ INSTALLED_APPS = [
     "calculator",
 ]
 
+# Request/response middleware order follows the default Django stack.
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -42,6 +49,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "core.urls"
 
+# Templates are discovered both in a project-level ``templates`` directory and
+# inside each app's ``templates`` folder.
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -61,7 +70,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 
-# Database
+# Local SQLite database used for the coding challenge.
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
@@ -72,7 +81,7 @@ DATABASES = {
 }
 
 
-# Password validation
+# Default Django password validators, kept for admin/user compatibility.
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -91,7 +100,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+# Brazilian Portuguese locale and Sao Paulo timezone for displayed dates/text.
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
 LANGUAGE_CODE = "pt-BR"
@@ -103,13 +112,27 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+# Static CSS is served from the repository's ``static`` directory in dev.
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# Default primary key field type
+# Default primary key field type used by generated Django models.
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Test DG 2026 API",
+    "DESCRIPTION": "API documentation for calculator support endpoints.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "ENUM_NAME_OVERRIDES": {
+        "ConsumerTypeEnum": ["Residencial", "Comercial", "Industrial"],
+    },
+}

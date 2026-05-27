@@ -1,94 +1,59 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 {% load static %}
 
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Cadastrar consumidor</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <main class="single-panel">
-        <section class="calculator-panel">
-            <h1>Cadastrar consumidor</h1>
-            <h2>Preencha os dados para incluir um consumidor na listagem.</h2>
+{% block title %}{{ form_title|default:"Cadastrar consumidor" }}{% endblock %}
+{% block main_class %}consumer-create-page{% endblock %}
 
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <p id="cep_loading" class="loading-message" hidden>Buscando cidade e estado...</p>
+{% block content %}
+    <section class="calculator-panel card">
+        <div class="section-heading">
+            <p class="eyebrow">{{ form_eyebrow|default:"Cadastro" }}</p>
+            <h1>{{ form_title|default:"Cadastrar consumidor" }}</h1>
+            <h2>{{ form_description|default:"Preencha os dados para incluir um consumidor na listagem." }}</h2>
+        </div>
+
+        <form
+            method="post"
+            class="stacked-form"
+            {% if form_api_url %}data-api-url="{{ form_api_url }}"{% endif %}
+            {% if form_api_method %}data-api-method="{{ form_api_method }}"{% endif %}
+        >
+            {% csrf_token %}
+            <div id="api_form_errors" class="form-alert" hidden></div>
+            {{ form.as_p }}
+
+            <div class="cep-status-panel" aria-live="polite">
+                <p id="cep_loading" class="loading-message" hidden>
+                    <span class="loading-spinner" aria-hidden="true"></span>
+                    Buscando cidade e estado...
+                </p>
+                <p id="cep_success" class="cep-success-message" hidden>Endereco preenchido pelo CEP.</p>
                 <p id="cep_error" class="cep-error-message" hidden>Erro ao buscar CEP. Verifique o CEP informado.</p>
+            </div>
 
-                <button type="submit">Salvar consumidor</button>
-                <a href="{% url 'calculator' %}" class="secondary-button">Voltar</a>
-            </form>
+            <div class="form-actions">
+                <button type="submit" class="primary-button">{{ submit_label|default:"Salvar consumidor" }}</button>
+                <a href="{% url 'consumers' %}" class="secondary-button">Voltar</a>
+            </div>
+        </form>
+    </section>
+
+    <aside class="home-side-panel">
+        <section class="card accent-card">
+            <p class="eyebrow">Regras cadastradas</p>
+            <h2>Descontos disponiveis por perfil</h2>
+            <div class="coverage-list">
+                {% for rule in discount_rules %}
+                    <span>{{ rule.consumer_type }} · {{ rule.get_consumption_range_display }} · {{ rule.discount }}%</span>
+                {% empty %}
+                    <span>Nenhuma regra cadastrada</span>
+                {% endfor %}
+            </div>
         </section>
-    </main>
+    </aside>
+{% endblock %}
 
-    <script>
-        function allowDecimalInput(event) {
-            if (event.inputType !== "insertText") {
-                return;
-            }
-
-            const nextValue =
-                event.target.value.slice(0, event.target.selectionStart) +
-                event.data +
-                event.target.value.slice(event.target.selectionEnd);
-
-            if (!/^[0-9.,]$/.test(event.data) || (nextValue.match(/[.,]/g) || []).length > 1) {
-                event.preventDefault();
-            }
-        }
-
-        function allowDigitsOnly(event) {
-            if (event.inputType === "insertText" && !/^[0-9]$/.test(event.data)) {
-                event.preventDefault();
-            }
-        }
-
-        async function fillAddressByCep(value) {
-            const cep = value.replace(/\D/g, "");
-            const loading = document.getElementById("cep_loading");
-            const error = document.getElementById("cep_error");
-            const cityInput = document.getElementById("id_city");
-            const stateInput = document.getElementById("id_state");
-
-            if (cep.length !== 8) {
-                loading.hidden = true;
-                error.hidden = true;
-                return;
-            }
-
-            loading.hidden = false;
-            error.hidden = true;
-            cityInput.value = "";
-            stateInput.value = "";
-
-            try {
-                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-                const data = await response.json();
-
-                if (!response.ok || data.erro) {
-                    error.hidden = false;
-                    return;
-                }
-
-                cityInput.value = data.localidade;
-                stateInput.value = data.uf;
-            } catch {
-                error.hidden = false;
-            } finally {
-                loading.hidden = true;
-            }
-        }
-
-        document.getElementById("id_document").onbeforeinput = allowDigitsOnly;
-        document.getElementById("id_zip_code").onbeforeinput = allowDigitsOnly;
-        document.getElementById("id_zip_code").onblur = function () {
-            fillAddressByCep(this.value);
-        };
-        document.getElementById("id_distributor_tax").onbeforeinput = allowDecimalInput;
-    </script>
-</body>
-</html>
+{% block scripts %}
+    <script src="{% static 'js/forms.js' %}"></script>
+    <script src="{% static 'js/create_consumer.js' %}"></script>
+{% endblock %}

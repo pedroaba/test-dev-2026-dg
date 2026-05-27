@@ -1,0 +1,15 @@
+<aside class="app-sidebar" aria-label="Navegacao principal">
+    <div class="sidebar-brand">
+        <p class="app-eyebrow">Gestao de energia</p>
+        <strong>Test DG 2026</strong>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="{% url 'calculator' %}" class="sidebar-link {% if headInfo.currentPage == 'calculator' %}is-active{% endif %}">
+            Home
+        </a>
+        <a href="{% url 'consumers' %}" class="sidebar-link {% if headInfo.currentPage == 'consumers' or headInfo.currentPage == 'create_consumer' or headInfo.currentPage == 'update_consumer' %}is-active{% endif %}">
+            Consumidores
+        </a>
+    </nav>
+</aside>

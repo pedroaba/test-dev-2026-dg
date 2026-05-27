@@ -19,6 +19,8 @@ DISCOUNT_RULES = [
 
 
 def create_discount_rules(apps, schema_editor):
+    """Seed the fixed discount matrix used by calculator forms and imports."""
+
     DiscountRule = apps.get_model("calculator", "DiscountRule")
 
     for consumer_type, consumption_range, coverage, discount in DISCOUNT_RULES:
@@ -33,6 +35,8 @@ def create_discount_rules(apps, schema_editor):
 
 
 def delete_discount_rules(apps, schema_editor):
+    """Remove the seeded discount matrix when the migration is reversed."""
+
     DiscountRule = apps.get_model("calculator", "DiscountRule")
     DiscountRule.objects.filter(
         consumer_type__in=["Residencial", "Comercial", "Industrial"],

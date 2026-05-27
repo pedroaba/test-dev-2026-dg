@@ -1,0 +1,65 @@
+@media (max-width: 48rem) {
+    .app-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .app-sidebar {
+        position: static;
+        height: auto;
+        gap: 1rem;
+        border-right: 0;
+        border-bottom: 0.0625rem solid var(--border);
+        padding: 1rem;
+    }
+
+    .sidebar-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    .home-page,
+    .consumer-create-page {
+        grid-template-columns: 1fr;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .import-form,
+    .panel-header .secondary-button {
+        width: 100%;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 40rem) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .filters {
+        grid-template-columns: 1fr;
+    }
+
+    .result-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .result-item-highlight {
+        grid-column: auto;
+    }
+}

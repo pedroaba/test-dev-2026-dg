@@ -1,12 +1,27 @@
+"""Pure business rule used by the Django app and by the standalone checks."""
+
+
 def calculator(consumption: list, distributor_tax: float, tax_type: str) -> tuple:
-    """
-    returns a tuple of floats contained anual savings, monthly savings, applied_discount and coverage
+    """Calculate estimated energy savings for a consumer profile.
+
+    Args:
+        consumption: Monthly consumption values in kWh. The function uses the
+            average of the provided months to choose the discount tier.
+        distributor_tax: Distributor tariff applied to each covered kWh.
+        tax_type: Consumer type. Expected values are ``Residencial``,
+            ``Comercial`` or ``Industrial``.
+
+    Returns:
+        A tuple with ``annual_savings``, ``monthly_savings``,
+        ``applied_discount`` and ``coverage``. Savings are rounded monetary
+        values; discount and coverage are returned as decimal ratios.
     """
     annual_savings = 0
     monthly_savings = 0
     applied_discount = 0
     coverage = 0
 
+    # Discount and coverage are tiered by average monthly consumption.
     mean_of_consumption = sum(consumption) / len(consumption)
     if mean_of_consumption < 10_000:
         coverage = 0.9
@@ -33,6 +48,7 @@ def calculator(consumption: list, distributor_tax: float, tax_type: str) -> tupl
         elif tax_type == "Industrial":
             applied_discount = 0.18
 
+    # Only the covered portion of consumption receives the negotiated discount.
     covered_consumption = mean_of_consumption * coverage
     covered_value = covered_consumption * distributor_tax
 
@@ -48,6 +64,7 @@ def calculator(consumption: list, distributor_tax: float, tax_type: str) -> tupl
 
 
 if __name__ == "__main__":
+    # Lightweight executable regression checks for the challenge scenarios.
     print("Testing...")
 
     assert calculator([1518, 1071, 968], 0.95871974, "Industrial") == (
